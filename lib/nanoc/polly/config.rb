@@ -9,7 +9,11 @@
 module Nanoc::Polly
   class Config
     class << self
-      attr_accessor :nanoc_directory
+      attr_accessor :data_source_index
+    end
+
+    def self.data_source_index
+      @data_source_index || 0
     end
   end
 end

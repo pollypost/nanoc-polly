@@ -22,6 +22,7 @@ option :i, :host, 'host to use (default: 0.0.0.0)', :argument => :optional
 
 module Nanoc::CLI::Commands
   class Edit < ::Nanoc::CLI::CommandRunner
+    DEFAULT_DATA_SOURCE_INDEX = 0
     DEFAULT_HANDLER_NAME = :thin
     DEFAULT_BACKEND_PATH_PREFIX = '/polly/'
     DEFAULT_ASSETS_PATH_PREFIX = '/polly/assets/'
@@ -62,6 +63,7 @@ module Nanoc::CLI::Commands
       rack_polly_options = {}
 
       # set required options
+      data_source_index = site.config[:polly][:data_source_index] ? site.config[:polly][:data_source_index] : DEFAULT_DATA_SOURCE_INDEX
       backend_path_prefix = site.config[:polly][:backend_path_prefix] ? site.config[:polly][:backend_path_prefix] : DEFAULT_BACKEND_PATH_PREFIX
       assets_path_prefix = site.config[:polly][:assets_path_prefix] ? site.config[:polly][:assets_path_prefix] : DEFAULT_ASSETS_PATH_PREFIX
       rack_polly_options = rack_polly_options.merge({
@@ -93,7 +95,8 @@ module Nanoc::CLI::Commands
           run Rack::File.new(site.config[:output_dir])
         end
         map backend_path_prefix do
-         run Nanoc::Polly::Backend.new
+          Nanoc::Polly::Config.data_source_index = data_source_index
+          run Nanoc::Polly::Backend.new
         end
       end.to_app
 

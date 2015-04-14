@@ -11,6 +11,7 @@ require 'json'
 require 'nanoc'
 require 'loofah'
 require 'htmlbeautifier'
+require 'nanoc/polly/config'
 
 module Nanoc::Polly
 class Backend < Sinatra::Base
@@ -44,7 +45,7 @@ class Backend < Sinatra::Base
       # TODO find a way to not have to load the site twice in one request
       # assuming we are running in a nanoc site dir
       site = Nanoc::Site.new('.')
-      data_source = Nanoc::DataSources::FilesystemUnified.new(site, '/', '/', {})
+      data_source = site.data_sources[Nanoc::Polly::Config.data_source_index]
       if site.items[identifier]
         return [409, {}, {
           about: identifier,
@@ -122,7 +123,7 @@ class Backend < Sinatra::Base
     # TODO find a way to not have to load the site twice in one request
     # assuming we are running in a nanoc site dir
     site = Nanoc::Site.new('.')
-    data_source = Nanoc::DataSources::FilesystemUnified.new(site, '/', '/', {})
+    data_source = site.data_sources[Nanoc::Polly::Config.data_source_index]
     attributes = []
     # read and use attributes from saved item
     if item = site.items[identifier]

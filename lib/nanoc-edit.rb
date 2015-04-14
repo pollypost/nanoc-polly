@@ -28,7 +28,13 @@ module Nanoc::CLI::Commands
     DEFAULT_ASSETS_PATH_PREFIX = '/polly/assets/'
 
     def run
-      require_site
+      # require_site
+      site = nil
+      if Nanoc::Site.cwd_is_nanoc_site?
+        site = Nanoc::Site.new('.')
+      else
+        raise ::Nanoc::Errors::GenericTrivial, 'The current working directory does not seem to be a nanoc site.'
+      end
 
       require 'rack'
       require 'rack/polly'
@@ -57,7 +63,6 @@ module Nanoc::CLI::Commands
       }
 
       # Build app
-      site = self.site
       require 'nanoc/polly/backend'
 
       rack_polly_options = {}

@@ -44,26 +44,16 @@ class Backend < Sinatra::Base
     if identifier && json['content']
       # TODO find a way to not have to load the site twice in one request
       # assuming we are running in a nanoc site dir
-      site = Nanoc::Site.new('.')
-      data_source = site.data_sources[Nanoc::Polly::Config.data_source_index]
-      if site.items[identifier]
+      @site = Nanoc::Site.new('.')
+      @data_source = @site.data_sources[Nanoc::Polly::Config.data_source_index]
+      if @site.items[identifier]
         return [409, {}, {
           about: identifier,
           message: "Page already exists."
         }.to_json ]
       end
 
-      sanitized_content = sanitize_content(json['content'])
-      data_source.create_item(sanitized_content, {
-        about: about,
-        title: json['title'] ? json['title'] : 'Title',
-        layout: 'default'}, identifier)
-      recompile!
-      return [ 202, {}, {
-        about: identifier,
-        message: "Page creation request accepted.",
-        content: sanitized_content
-      }.to_json ]
+      create! identifier, about, json
     else
       return [400, {}, {
         message: "Invalid request."
@@ -122,11 +112,11 @@ class Backend < Sinatra::Base
 
     # TODO find a way to not have to load the site twice in one request
     # assuming we are running in a nanoc site dir
-    site = Nanoc::Site.new('.')
-    data_source = site.data_sources[Nanoc::Polly::Config.data_source_index]
+    @site = Nanoc::Site.new('.')
+    @data_source = @site.data_sources[Nanoc::Polly::Config.data_source_index]
     attributes = []
     # read and use attributes from saved item
-    if item = site.items[identifier]
+    if item = @site.items[identifier]
       attributes = sanitize_attributes(item.attributes)
     else
       return [404, {}, {
@@ -135,21 +125,12 @@ class Backend < Sinatra::Base
       }.to_json ]
     end
 
+    @content_bak = item.raw_content.clone
+    @attributes_bak = item.attributes.clone
     body = request.body.read
     json = JSON.parse(body)
     if json['content']
-      sanitized_content = sanitize_content(json['content'])
-      attributes.merge!(json['attributes']) if json['attributes']
-      # make sure that about is not overriden in PUT
-      # we always want this to be the value given in the request path
-      attributes[:about] = about
-      data_source.create_item(sanitized_content, attributes, identifier)
-      recompile!
-      return [ 202, {}, {
-        about: identifier,
-        message: "Page update request accepted.",
-        content: sanitized_content
-      }.to_json ]
+      update! identifier, about, attributes, json
     else
       return [400, {}, {
         message: "Invalid request."
@@ -198,6 +179,67 @@ class Backend < Sinatra::Base
     # assuming we are running in a nanoc site dir
     site = Nanoc::Site.new('.')
     site.compile
+  end
+
+  def create! identifier, about, json
+    sanitized_content = sanitize_content(json['content'])
+    begin
+      @data_source.create_item(sanitized_content, {
+        about: about,
+        title: json['title'] ? json['title'] : 'Title',
+        #layout: 'non'}, identifier)
+        layout: 'default'}, identifier)
+      recompile!
+    rescue Nanoc::Errors::Generic => e
+      # rollback, i.e. delete the newly created file
+      # we assume the file was created in this request as we should have
+      # passed the "page already exists" test in the post handler
+      new_items = @data_source.items.select do |item|
+        item.identifier == identifier
+      end
+      path = File.expand_path(new_items.first.raw_filename)
+      if File.file? path
+        File.delete path
+      end
+      puts "[ERR] #{e}"
+      recompile!
+      return [ 400, {}, {
+        about: identifier,
+        message: "Invalid request. #{e} Rolled back."
+      }.to_json ]
+    end
+
+    return [ 202, {}, {
+      about: identifier,
+      message: "Page creation request accepted.",
+      content: sanitized_content
+    }.to_json ]
+  end
+
+  def update! identifier, about, attributes, json
+    sanitized_content = sanitize_content(json['content'])
+    attributes.merge!(json['attributes']) if json['attributes']
+    # make sure that about is not overriden in PUT
+    # we always want this to be the value given in the request path
+    attributes[:about] = about
+    begin
+      @data_source.create_item(sanitized_content, attributes, identifier)
+      recompile!
+    rescue Nanoc::Errors::Generic => e
+      @data_source.create_item(@content_bak, @attributes_bak, identifier)
+      recompile!
+      puts "[ERR] #{e}"
+      return [ 400, {}, {
+        about: identifier,
+        message: "Invalid request. #{e} Rolled back."
+      }.to_json ]
+    end
+
+    return [ 202, {}, {
+      about: identifier,
+      message: "Page update request accepted.",
+      content: sanitized_content
+    }.to_json ]
   end
 
   # start the server if ruby file executed directly

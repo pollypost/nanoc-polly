@@ -153,6 +153,8 @@ class Backend < Sinatra::Base
     }.to_json]
   end
 
+  protected
+
   # @TODO
   def sanitize_about about
     return about

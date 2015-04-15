@@ -26,6 +26,7 @@ module Nanoc::CLI::Commands
     DEFAULT_HANDLER_NAME = :thin
     DEFAULT_BACKEND_PATH_PREFIX = '/polly/'
     DEFAULT_ASSETS_PATH_PREFIX = '/polly/assets/'
+    DEFAULT_ASSETS_LOCATION = 'public/assets/'
 
     def run
       # require_site
@@ -52,8 +53,9 @@ module Nanoc::CLI::Commands
       end
 
       with_assets = options[:assets] ? true : false
-      if with_assets
-        raise ArgumentError, "assets_location not configured" unless site.config[:polly][:assets_location]
+      assets_location = site.config[:polly][:assets_location] ? site.config[:polly][:assets_location] : DEFAULT_ASSETS_LOCATION
+      if with_assets && !File.directory?(File.expand_path(assets_location))
+        raise ArgumentError, "assets_location '#{assets_location}' is not a directory."
       end
 
       # Set options
@@ -88,7 +90,7 @@ module Nanoc::CLI::Commands
 
       app = Rack::Builder.new do
         map assets_path_prefix do
-          run Rack::File.new(site.config[:polly][:assets_location])
+          run Rack::File.new(assets_location)
         end if with_assets
         map '/' do
           use Rack::CommonLogger

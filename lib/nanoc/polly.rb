@@ -7,6 +7,7 @@
 
 
 require "nanoc/polly/version"
+require "nanoc/helpers/polly"
 require 'nanoc'
 require 'nanoc/cli'
 require 'nanoc/cli/command_runner'

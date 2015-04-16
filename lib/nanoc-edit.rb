@@ -52,8 +52,9 @@ module Nanoc::CLI::Commands
         end
       end
 
+      polly_config = site.config[:polly] ? site.config[:polly] : {}
       with_assets = options[:assets] ? true : false
-      assets_location = site.config[:polly][:assets_location] ? site.config[:polly][:assets_location] : DEFAULT_ASSETS_LOCATION
+      assets_location = polly_config[:assets_location] ? polly_config[:assets_location] : DEFAULT_ASSETS_LOCATION
       if with_assets && !File.directory?(File.expand_path(assets_location))
         raise ArgumentError, "assets_location '#{assets_location}' is not a directory."
       end
@@ -70,21 +71,21 @@ module Nanoc::CLI::Commands
       rack_polly_options = {}
 
       # set required options
-      data_source_index = site.config[:polly][:data_source_index] ? site.config[:polly][:data_source_index] : DEFAULT_DATA_SOURCE_INDEX
-      backend_path_prefix = site.config[:polly][:backend_path_prefix] ? site.config[:polly][:backend_path_prefix] : DEFAULT_BACKEND_PATH_PREFIX
-      assets_path_prefix = site.config[:polly][:assets_path_prefix] ? site.config[:polly][:assets_path_prefix] : DEFAULT_ASSETS_PATH_PREFIX
+      data_source_index = polly_config[:data_source_index] ? polly_config[:data_source_index] : DEFAULT_DATA_SOURCE_INDEX
+      backend_path_prefix = polly_config[:backend_path_prefix] ? polly_config[:backend_path_prefix] : DEFAULT_BACKEND_PATH_PREFIX
+      assets_path_prefix = polly_config[:assets_path_prefix] ? polly_config[:assets_path_prefix] : DEFAULT_ASSETS_PATH_PREFIX
       rack_polly_options = rack_polly_options.merge({
         assets_path_prefix: assets_path_prefix,
         backend_path_prefix: backend_path_prefix
       })
 
       # set image storage options
-      image_storage = site.config[:polly][:image_storage] ? site.config[:polly][:image_storage] : false
+      image_storage = polly_config[:image_storage] ? polly_config[:image_storage] : false
       if image_storage && image_storage.to_s == 'uploadcare'
-        raise ArgumentError, "uploadcare_api_key not configured" unless site.config[:polly][:uploadcare_api_key]
+        raise ArgumentError, "uploadcare_api_key not configured" unless polly_config[:uploadcare_api_key]
         rack_polly_options = rack_polly_options.merge({
           image_storage: image_storage,
-          uploadcare_api_key: site.config[:polly][:uploadcare_api_key]
+          uploadcare_api_key: polly_config[:uploadcare_api_key]
         })
       end
 

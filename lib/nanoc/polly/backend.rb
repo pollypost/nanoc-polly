@@ -189,7 +189,6 @@ class Backend < Sinatra::Base
       @data_source.create_item(sanitized_content, {
         about: about,
         title: json['title'] ? json['title'] : 'Title',
-        #layout: 'non'}, identifier)
         layout: 'default'}, identifier)
       recompile!
     rescue Nanoc::Errors::Generic => e

@@ -8,12 +8,12 @@ This Ruby Gem provides a backend for [Pollypost](https://github.com/pollypost/po
 
 Install nanoc-polly yourself as:
 
-    $ gem install nanoc-polly --pre
+    $ gem install nanoc-polly
 
 Or, if you're using [Bundler](http://bundler.io/), add this line to your application's Gemfile:
 
 ```ruby
-gem 'nanoc-polly', "0.0.1.pre1"
+gem 'nanoc-polly'
 ```
 
 And then execute:

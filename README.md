@@ -52,7 +52,7 @@ In your nanoc.yaml file you can set the following configuration options for Poll
 
 ```ruby
 polly:
-  assets_location: './polly'            # folder where the compiled Pollypost assets are stored
+  assets_location: 'public/polly'       # folder where the compiled Pollypost assets are stored
   assets_path_prefix: '/polly/assets/'  # url prefix for Pollypost asset paths
   backend_path_prefix: '/polly/'        # url prefix for Pollypost backend paths
   image_storage: ''                     # which image storage to use (e.g. 'uploadcare')

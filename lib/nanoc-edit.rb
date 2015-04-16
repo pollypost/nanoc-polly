@@ -26,7 +26,7 @@ module Nanoc::CLI::Commands
     DEFAULT_HANDLER_NAME = :thin
     DEFAULT_BACKEND_PATH_PREFIX = '/polly/'
     DEFAULT_ASSETS_PATH_PREFIX = '/polly/assets/'
-    DEFAULT_ASSETS_LOCATION = 'public/assets/'
+    DEFAULT_ASSETS_LOCATION = 'public/polly/'
 
     def run
       # require_site

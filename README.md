@@ -33,6 +33,23 @@ or, if you cloned the source files to your local file system:
 gem 'nanoc-polly', :path => './path_to/nanoc-polly'
 ```
 
+### Polly Helper
+
+Nanoc-polly comes with a predefined helper that adds functionality for generating the 'about' tags needed for Pollypost. See [Pollypost](https://github.com/pollypost/pollypost) for details.
+
+To activate the helper, add this line to a file in your `lib` folder:
+
+```ruby
+include Nanoc::Helpers::Polly
+```
+
+You can then generate a file's 'about' value with `item_about @item`:
+
+```html
+<div class="edit-this" about="<%= item_about @item %>">
+  <%= yield %>
+</div>
+```
 
 ## Usage
 
@@ -66,3 +83,14 @@ polly:
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+
+
+## License
+
+Copyright (C) 2015 [more onion](https://www.more-onion.com)
+
+Pollypost is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+Pollypost is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License (LICENSE.md) along with this program. If not, see <http://www.gnu.org/licenses/>.
